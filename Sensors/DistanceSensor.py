@@ -1,13 +1,15 @@
 import math
 import pygame
 import numpy as np
-
+from pygame import gfxdraw
 from InstanceHelper import InstanceHelper
 
-# This sensor shall use raycasting to detect collisions
 
 class DistanceSensor:
-    def __init__(self, instance_helper: InstanceHelper, position: (int, int), rotation: (float, float), max_range: int, side_threshold=1):
+    """
+    This sensor uses ray marching to get distance information.
+    """
+    def __init__(self, instance_helper: InstanceHelper, position: (float, float), rotation: (float, float), max_range: int, side_threshold=1):
         """
 
         :param instance_helper: Instance helper.
@@ -26,7 +28,7 @@ class DistanceSensor:
         endpoint = self.calc_line_endpoint(position, rotation, max_range)
         self.scanline = pygame.draw.line(self.screen, (0, 255, 0), position, endpoint)
 
-    def update(self, position: (int, int), rotation: (int, int)) -> int:
+    def update(self, position: (float, float), rotation: (float, float)) -> float:
         """
         :param position: Position of the caster
         :param rotation: Rotation vector of the caster
@@ -42,7 +44,7 @@ class DistanceSensor:
         distance = math.sqrt(math.pow(position[0] - endpoint[0], 2) + math.pow(position[1] - endpoint[1], 2))
         return distance
 
-    def calc_line_endpoint(self, position: (int, int), rotation: (int, int), length: int):
+    def calc_line_endpoint(self, position: (float, float), rotation: (float, float), length: int):
         arr = np.array(rotation)
         angle = np.degrees(np.arctan2(*arr.T[::-1]))
 
@@ -65,7 +67,8 @@ class DistanceSensor:
 
         new_position = (position[0] + (self.unit_vector[0] * smallest_distance), position[1] + (self.unit_vector[1] * smallest_distance))
         # Debug
-        pygame.draw.circle(self.screen, (0, 0, 255), position, smallest_distance, width=1)
+        pygame.gfxdraw.aacircle(self.screen, int(position[0]), int(position[1]), int(smallest_distance), (0, 0, 255))
+        # pygame.draw.circle(self.screen, (0, 0, 255), position, smallest_distance, width=1)
         if smallest_distance > self.side_threshold \
                 and iteration < 50 \
                 and position[0] > 0 \
@@ -82,12 +85,9 @@ class DistanceSensor:
         try:
             vec_1 = vector[0] / vector_length
             vec_2 = vector[1] / vector_length
-        except:
-            return (0, 0)
+        except ZeroDivisionError:
+            return 0, 0
         return vec_1, vec_2
-
-    def signed_dist_to_rect(self, point:(int, int), centre: (int, int), size: (int, int)):
-        offset = abs(point-centre) - size
 
     def rect_distance(self, point: (int, int), rect2: pygame.Rect):
         x1, y1 = point

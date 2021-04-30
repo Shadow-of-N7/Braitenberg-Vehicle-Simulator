@@ -11,7 +11,9 @@ class Game:
     def __init__(self):
         self.is_active = True
         pygame.init()
+        #self.screen = pygame.display.set_mode((1920, 1080), pygame.HWSURFACE|pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode((1280, 720))
+        #pygame.display.gl_set_attribute(pygame.GL_ACCELERATED_VISUAL, 1)
         self.clock = pygame.time.Clock()
         pygame.display.set_caption('Mobile Robots')
         self.world = World(self.screen, 100)
@@ -26,6 +28,12 @@ class Game:
         """
         while self.is_active:
             for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        print('Regenerating world')
+                        self.world.regenerate()
+                    if event.key == pygame.K_ESCAPE:
+                        self.is_active = False
                 if event.type == pygame.QUIT:
                     self.is_active = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
